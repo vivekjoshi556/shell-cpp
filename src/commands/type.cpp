@@ -13,6 +13,11 @@ namespace commands {
         int start, end = -1;
         std::string s = std::getenv("PATH");
         char del = ':';
+
+        if(commands::command_registry.find(args) != commands::command_registry.end()) {
+            std::cout << args << " is a shell builtin" << std::endl;
+            return;
+        } 
         
         do {
             start = end + 1;
@@ -24,12 +29,7 @@ namespace commands {
                 return;
             }
         } while (end != -1);
-
-        if(commands::command_registry.find(args) != commands::command_registry.end()) {
-            std::cout << args << " is a shell builtin" << std::endl;
-        } 
-        else {
-            std::cout << args << ": not found" << std::endl;
-        }
+        
+        std::cout << args << ": not found" << std::endl;
     }
 }
