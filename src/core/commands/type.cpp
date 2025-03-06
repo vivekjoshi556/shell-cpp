@@ -6,17 +6,19 @@ namespace commands {
 
     void TypeCommand::execute() {
 
-        std::pair<CommandType, std::string> type = findCommandType(args);
+        for (const auto &arg: args) {
+            std::pair<CommandType, std::string> type = findCommandType(arg);
 
-        switch (type.first) {
-            case CommandType::BUILTIN:
-                std::cout << args << " is a shell builtin\a" << std::endl;
-                break;
-            case CommandType::PATH:
-                std::cout << args << " is " << type.second << std::endl;
-                break;
-            case CommandType::UNKNOWN:
-                std::cout << args << ": not found" << std::endl;
+            switch (type.first) {
+                case CommandType::BUILTIN:
+                    std::cout << arg << " is a shell builtin\a" << std::endl;
+                    break;
+                case CommandType::PATH:
+                    std::cout << arg << " is " << type.second << std::endl;
+                    break;
+                case CommandType::UNKNOWN:
+                    std::cout << arg << ": not found" << std::endl;
+            }
         }
     }
 }

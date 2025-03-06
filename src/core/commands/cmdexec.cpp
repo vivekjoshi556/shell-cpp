@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <iostream>
+#include <filesystem>
 #include <sys/wait.h>
 #include "cmdexec.hpp"
 
@@ -8,17 +9,18 @@ namespace commands {
         pid_t child_pid = fork();
 
         if (child_pid == 0) {
-            const char* argv[3];
-            argv[0] = exec_path.c_str();
-
-            if (!args.empty()) {
-                argv[1] = args.c_str();
-                argv[2] = nullptr;
-            } else {
-                argv[1] = nullptr;
-            }
+            // const char* argv[3];
+            std::vector<const char*> argv;
             
-            execv(exec_path.c_str(), const_cast<char* const*>(argv));
+            argv.push_back(std::filesystem::path(exec_path).filename().c_str());
+
+            for(const auto &arg: args) {
+                argv.push_back(arg.c_str());
+            }
+
+            argv.push_back(nullptr);
+            
+            execv(exec_path.c_str(), const_cast<char* const*>(argv.data()));
         }
 
         // Handle failures.

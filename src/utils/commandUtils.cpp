@@ -25,4 +25,29 @@ namespace commands {
 
         return std::make_pair(CommandType::UNKNOWN, "");
     }
+
+    std::vector<std::string> parseCommands(const std::string &str) {
+        std::vector<std::string> result;
+        
+        if(str.empty()) return result;
+
+        std::string token;
+    
+        for (char ch : str) {
+            if (ch == ' ') {
+                if (!token.empty()) {
+                    result.push_back(token);
+                    token.clear();
+                }
+            } else {
+                token += ch;
+            }
+        }
+    
+        if (!token.empty()) {
+            result.push_back(token);
+        }
+    
+        return result;
+    }
 }
