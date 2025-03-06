@@ -16,6 +16,7 @@ namespace commands {
         explicit Command(const std::string&, const std::string&, const CommandType, const std::string&);
         virtual void execute() = 0;
         virtual ~Command() = default;
+        std::string getName(){ return name; }
     };
 }
 
