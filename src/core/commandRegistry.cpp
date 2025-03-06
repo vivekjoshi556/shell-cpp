@@ -1,0 +1,15 @@
+#include "commandRegistry.hpp"
+
+#include "./commands/exit.hpp"
+#include "./commands/type.hpp"
+#include "./commands/echo.hpp"
+#include "./commands/cmdexec.hpp"
+
+namespace commands {
+    const std::unordered_map<std::string, CommandCreator> command_registry = {
+        {"echo", makeCommand<EchoCommand>},
+        {"type", makeCommand<TypeCommand>},
+        {"exit", makeCommand<ExitCommand>},
+        {"cmdexec", makeCommand<Cmdexec>}
+    };
+}

@@ -1,6 +1,6 @@
 #include <iostream>
-#include "./commands/command.hpp"
-#include "commandFactory.hpp"
+#include "core/command.hpp"
+#include "core/commandFactory.hpp"
 
 int main() {
   // Flush after every std::cout / std:cerr
@@ -11,6 +11,9 @@ int main() {
   while(true) {
     std::cout << "$ ";
     std::getline(std::cin, input);
+
+    if (input == "")
+      continue;
 
     auto command = commands::createCommand(input);
     if (command) {
