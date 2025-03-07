@@ -6,6 +6,11 @@
 
 namespace cmds {
     void Cmdexec::execute() {
+        if(access(exec_path.c_str(), X_OK) != 0) {
+            std::cout << exec_path << ": Permission denied" << std::endl;
+            return;
+        }
+
         pid_t child_pid = fork();
 
         if (child_pid == 0) {

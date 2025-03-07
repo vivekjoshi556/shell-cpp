@@ -18,7 +18,7 @@ namespace cmds {
             end = s.find(del, start);
             std::string path_url = s.substr(start, end - start) + "/" + name;
 
-            if (access(path_url.c_str(), F_OK) == 0 && access(path_url.c_str(), X_OK) == 0) {
+            if (access(path_url.c_str(), F_OK) == 0) {
                 return std::make_pair(CommandType::PATH, path_url);
             }
         } while (end != -1);
@@ -66,6 +66,7 @@ namespace cmds {
             if (escape) {
                 escape = false;
                 token.push_back(ch);
+                continue;
             }
 
             if (ch == '\'') {
