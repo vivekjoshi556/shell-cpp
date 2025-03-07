@@ -42,7 +42,7 @@ namespace cmds {
                     token.push_back(ch);
                 }
                 else if (activeDoubleQuote && (ch != '"' || (escape && ch == '"'))) {
-                    if (ch == '\\') {
+                    if (!escape && ch == '\\') {
                         escape = true;
                         continue;
                     }
