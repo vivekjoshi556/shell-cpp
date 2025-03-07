@@ -9,9 +9,9 @@ namespace cmds {
         std::string s = std::getenv("PATH");
         char del = ':';
         
-        if(command_registry.find(name) != command_registry.end()) {
+        if (command_registry.find(name) != command_registry.end()) {
             return std::make_pair(CommandType::BUILTIN, "");
-        } 
+        }
 
         do {
             start = end + 1;
@@ -29,18 +29,62 @@ namespace cmds {
     std::vector<std::string> parseCommands(const std::string &str) {
         std::vector<std::string> result;
         
-        if(str.empty()) return result;
+        if (str.empty()) return result;
 
         std::string token;
+        bool activeSingleQuote = false;
+        bool activeDoubleQuote = false;
+        bool escape = false;
     
         for (char ch : str) {
-            if (ch == ' ') {
+            if (activeSingleQuote || activeDoubleQuote) {
+                if (activeSingleQuote && ch != '\'') {
+                    token.push_back(ch);
+                }
+                else if (activeDoubleQuote && (ch != '"' || (escape && ch == '"'))) {
+                    if (ch == '\\') {
+                        escape = true;
+                        continue;
+                    }
+                    if (escape) {
+                        escape = false;
+                        if (ch != '\\' && ch != '$' && ch != '"') {
+                            token.push_back('\\');
+                        }
+                    }
+                    token.push_back(ch);
+                }
+                else if (activeSingleQuote) {
+                    activeSingleQuote = false;
+                }
+                else if (activeDoubleQuote) {
+                    activeDoubleQuote = false;
+                }
+                continue;
+            }
+
+            if (escape) {
+                escape = false;
+                token.push_back(ch);
+            }
+
+            if (ch == '\'') {
+                activeSingleQuote = true;
+            }
+            else if (ch == '"') {
+                activeDoubleQuote = true;
+            }
+            else if (ch == '\\') {
+                escape = true;
+            }
+            else if (ch == ' ') {
                 if (!token.empty()) {
                     result.push_back(token);
                     token.clear();
                 }
-            } else {
-                token += ch;
+            }
+            else {
+                token.push_back(ch);
             }
         }
     

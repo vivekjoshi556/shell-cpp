@@ -7,7 +7,7 @@
 namespace cmds {
     CommandPtr createCommand(const std::string &command) {
         size_t index = command.find(" ");
-        std::string name = command.substr(0, index);
+        std::string name = parseCommands(command.substr(0, index))[0];
         std::string args = (index == std::string::npos) ? "" : command.substr(command.find(" ") + 1);
 
         std::pair<CommandType, std::string> cmd_type = findCommandType(name);
