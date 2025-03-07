@@ -1,7 +1,7 @@
 #include <iostream>
 #include "echo.hpp"
 
-namespace commands {
+namespace cmds {
     void EchoCommand::execute() {
         for (const std::string &str: args)
             std::cout << str << " ";

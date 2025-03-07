@@ -3,7 +3,7 @@
 
 #include <memory>
 
-namespace commands {
+namespace cmds {
     // Forward declaration.
     class Command;
 

@@ -32,6 +32,8 @@
 *.app
 server
 
+test
+
 # CMake
 CMakeLists.txt.user
 CMakeCache.txt

@@ -4,7 +4,7 @@
 
 namespace fs = std::filesystem;
 
-namespace commands {
+namespace cmds {
     void PwdCommand::execute() {
         std::cout << fs::current_path().c_str() << std::endl;
     }

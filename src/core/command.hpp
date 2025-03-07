@@ -4,7 +4,7 @@
 #include <vector>
 #include "../utils/types.hpp"
 
-namespace commands {
+namespace cmds {
     class Command {
     protected:
         std::string name;

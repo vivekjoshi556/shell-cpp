@@ -3,7 +3,7 @@
 
 #include "../command.hpp"
 
-namespace commands {
+namespace cmds {
     class Cmdexec: public Command {
     public:
         using Command::Command;

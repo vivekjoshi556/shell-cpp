@@ -1,7 +1,7 @@
 #include "command.hpp"
 #include "../utils/commandUtils.hpp"
 
-namespace commands {
+namespace cmds {
     Command::Command(
         const std::string &name, const std::string &args, const CommandType type, const std::string &path
     ) {

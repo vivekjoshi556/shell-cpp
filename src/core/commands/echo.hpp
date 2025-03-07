@@ -3,7 +3,7 @@
 
 #include "../command.hpp"
 
-namespace commands {
+namespace cmds {
     class EchoCommand: public Command {
     public:
         using Command::Command;

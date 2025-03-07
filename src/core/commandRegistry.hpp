@@ -5,7 +5,7 @@
 #include "command.hpp"
 #include <unordered_map>
 
-namespace commands {
+namespace cmds {
     template <typename T>
     CommandPtr makeCommand(
         const std::string &name,

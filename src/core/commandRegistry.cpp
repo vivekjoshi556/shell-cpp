@@ -7,7 +7,7 @@
 #include "./commands/echo.hpp"
 #include "./commands/cmdexec.hpp"
 
-namespace commands {
+namespace cmds {
     const std::unordered_map<std::string, CommandCreator> command_registry = {
         {"cd", makeCommand<CdCommand>},
         {"pwd", makeCommand<PwdCommand>},

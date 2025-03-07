@@ -3,7 +3,7 @@
 
 #include "command.hpp"
 
-namespace commands {
+namespace cmds {
     CommandPtr createCommand(const std::string&);
 }
 

@@ -3,13 +3,13 @@
 #include "commandUtils.hpp"
 #include "../core/commandRegistry.hpp"
 
-namespace commands {
+namespace cmds {
     std::pair<CommandType, std::string> findCommandType(const std::string &name) {
         int start, end = -1;
         std::string s = std::getenv("PATH");
         char del = ':';
         
-        if(commands::command_registry.find(name) != commands::command_registry.end()) {
+        if(command_registry.find(name) != command_registry.end()) {
             return std::make_pair(CommandType::BUILTIN, "");
         } 
 

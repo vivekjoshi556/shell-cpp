@@ -2,7 +2,7 @@
 #include <iostream>
 #include "../../utils/commandUtils.hpp"
 
-namespace commands {
+namespace cmds {
 
     void TypeCommand::execute() {
 

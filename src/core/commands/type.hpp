@@ -3,7 +3,7 @@
 
 #include "../command.hpp"
 
-namespace commands {
+namespace cmds {
     class TypeCommand: public Command {
     public:
         using Command::Command;

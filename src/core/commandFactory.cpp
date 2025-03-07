@@ -4,7 +4,7 @@
 #include "commandRegistry.hpp"
 #include "../utils/commandUtils.hpp"
 
-namespace commands {
+namespace cmds {
     CommandPtr createCommand(const std::string &command) {
         size_t index = command.find(" ");
         std::string name = command.substr(0, index);

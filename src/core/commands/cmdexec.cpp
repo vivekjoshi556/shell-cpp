@@ -4,7 +4,7 @@
 #include <sys/wait.h>
 #include "cmdexec.hpp"
 
-namespace commands {
+namespace cmds {
     void Cmdexec::execute() {
         pid_t child_pid = fork();
 

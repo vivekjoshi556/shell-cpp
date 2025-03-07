@@ -15,7 +15,7 @@ int main() {
     if (input == "")
       continue;
 
-    auto command = commands::createCommand(input);
+    auto command = cmds::createCommand(input);
     if (command) {
       command->execute();
     }

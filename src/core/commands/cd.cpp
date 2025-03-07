@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <iostream>
 
-namespace commands {
+namespace cmds {
     void CdCommand::execute() {
         std::string path = args[0];
         if (path[0] == '~') {

@@ -5,7 +5,7 @@
 #include <vector>
 #include "types.hpp"
 
-namespace commands {
+namespace cmds {
     std::pair<CommandType, std::string> findCommandType(const std::string&);
     std::vector<std::string> parseCommands(const std::string&);
 }
