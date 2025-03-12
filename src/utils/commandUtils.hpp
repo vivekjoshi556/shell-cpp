@@ -6,6 +6,9 @@
 #include "types.hpp"
 
 namespace cmds {
+    extern int std_out;
+    extern int std_err;
+
     std::pair<CommandType, std::string> findCommandType(const std::string&);
     std::vector<std::string> parseCommands(const std::string&);
 }

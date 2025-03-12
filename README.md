@@ -7,4 +7,4 @@ cd, pwd, echo and more. Learnings: shell command parsing, REPLs, builtin command
 
 ### Ideas:
 - If we get to a point where there are many commands look into "Automatic Command Registration".
-
+- Very poor error checking as of now.

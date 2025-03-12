@@ -4,6 +4,19 @@
 #include "../core/commandRegistry.hpp"
 
 namespace cmds {
+    int std_out = dup(STDOUT_FILENO);
+    int std_err = dup(STDERR_FILENO);
+
+    void cleanup() {
+        close(std_out);
+        close(std_err);
+    }
+
+    static bool registered = [] {
+        atexit(cleanup);
+        return true;
+    }();
+
     std::pair<CommandType, std::string> findCommandType(const std::string &name) {
         int start, end = -1;
         std::string s = std::getenv("PATH");

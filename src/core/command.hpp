@@ -2,6 +2,7 @@
 #define COMMAND_HPP
 
 #include <vector>
+#include <unistd.h>
 #include "../utils/types.hpp"
 
 namespace cmds {
@@ -15,8 +16,8 @@ namespace cmds {
     public:
         explicit Command(const std::string&, const std::string&, const CommandType, const std::string&);
         virtual void execute() = 0;
-        virtual ~Command() = default;
-        std::string getName(){ return name; }
+        virtual ~Command();
+        std::string getName();
     };
 }
 
