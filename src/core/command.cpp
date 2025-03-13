@@ -33,9 +33,9 @@ namespace cmds {
                 dup2(fp, STDOUT_FILENO);
                 close(fp);
             }
-            if (arg == "2>") {
+            if (arg == "2>" || arg == "2>>") {
                 int flags = O_CREAT | O_WRONLY | ((arg.find(">>") == std::string::npos) ? O_TRUNC : O_APPEND);
-                int fp = open(tokens[i + 1].c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+                int fp = open(tokens[i + 1].c_str(), flags, 0644);
                 dup2(fp, STDERR_FILENO);
                 close(fp);
             }
