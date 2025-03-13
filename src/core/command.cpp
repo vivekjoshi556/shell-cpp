@@ -6,13 +6,12 @@
 
 namespace cmds {
     Command::Command(
-        const std::string &name, const std::string &args, const CommandType type, const std::string &path
+        const std::string &name, std::vector<std::string> &tokens, const CommandType type, const std::string &path
     ) {
         this->name = name;
         this->type = type;
         this->exec_path = path;
-        
-        std::vector<std::string> tokens = parseCommands(args);
+
         std::unordered_set<std::string> redirects = {">", "1>", "2>", ">>", "1>>", "2>>"};
 
         int i = 0;

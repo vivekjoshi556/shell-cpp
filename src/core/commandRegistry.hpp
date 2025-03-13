@@ -9,7 +9,7 @@ namespace cmds {
     template <typename T>
     CommandPtr makeCommand(
         const std::string &name,
-        const std::string &args,
+        std::vector<std::string> &args,
         const CommandType type,
         const std::string &path
     ) {

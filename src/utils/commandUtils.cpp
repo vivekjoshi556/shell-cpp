@@ -26,6 +26,10 @@ namespace cmds {
             return std::make_pair(CommandType::BUILTIN, "");
         }
 
+        if (access(name.c_str(), F_OK) == 0) {
+            return std::make_pair(CommandType::DIRECT, name);
+        }
+
         do {
             start = end + 1;
             end = s.find(del, start);

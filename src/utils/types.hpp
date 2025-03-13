@@ -16,7 +16,7 @@ namespace cmds {
     };
 
     using CommandPtr = std::unique_ptr<Command>;
-    using CommandCreator = CommandPtr (*)(const std::string&, const std::string&, const CommandType, const std::string&);
+    using CommandCreator = CommandPtr (*)(const std::string&, std::vector<std::string>&, const CommandType, const std::string&);
     
 }
 

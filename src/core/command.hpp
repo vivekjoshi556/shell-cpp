@@ -14,7 +14,7 @@ namespace cmds {
         std::string exec_path;
 
     public:
-        explicit Command(const std::string&, const std::string&, const CommandType, const std::string&);
+        explicit Command(const std::string&, std::vector<std::string>&, const CommandType, const std::string&);
         virtual void execute() = 0;
         virtual ~Command();
         std::string getName();
