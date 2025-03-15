@@ -1,9 +1,15 @@
+#include <vector>
 #include <unistd.h>
 #include <iostream>
+#include <algorithm>
+#include <filesystem>
 #include "commandUtils.hpp"
 #include "../core/commandRegistry.hpp"
 
+namespace fs = std::filesystem;
+
 namespace cmds {
+    // stdout and stderr duplicates used during redirection.
     int std_out = dup(STDOUT_FILENO);
     int std_err = dup(STDERR_FILENO);
 
@@ -16,6 +22,21 @@ namespace cmds {
         atexit(cleanup);
         return true;
     }();
+
+    std::string longestCommonPrefix(std::vector<std::string>& strs) {
+        if (strs.empty()) return "";
+
+        std::sort(strs.begin(), strs.end());
+        std::string first = strs[0];
+        std::string last = strs[strs.size() - 1];
+        int i = 0;
+
+        while (i < first.size() && i < last.size() && first[i] == last[i]) {
+            i++;
+        }
+    
+        return first.substr(0, i);
+    }    
 
     std::pair<CommandType, std::string> findCommandType(const std::string &name) {
         int start, end = -1;
@@ -112,4 +133,115 @@ namespace cmds {
     
         return result;
     }
+
+    std::vector<std::string> autoComplete(const std::string &partial) {
+        std::vector<std::string> result;
+        
+        // Look into built-in commands
+        for(auto it: command_registry) {
+            if(it.first.find(partial) == 0) {
+                result.push_back(it.first);
+            }
+        }
+
+        // Look into path
+        std::string env = getenv("PATH");
+        int start = 0, end = 0;
+        std::string dir_path = "";
+        
+        while (start < env.size()) {
+            end = env.find(':', start);
+            if(end != std::string::npos) {
+                dir_path = env.substr(start, end - start);
+                start = end + 1;
+            }
+            else {
+                if(start < env.size()) {
+                    dir_path = env.substr(start);
+                }
+                start = env.size();
+            }
+
+            if (dir_path != "") {
+                for (auto const &dir_entry: fs::directory_iterator(dir_path)) {
+                    std::string p = dir_entry.path().string();
+
+                    int last_idx = p.find_last_of(fs::path::preferred_separator);
+                    if (last_idx != std::string::npos) {
+                        p = p.substr(last_idx + 1);
+                        
+                        if(p.find(partial) == 0) {
+                            result.push_back(p);
+                        }
+                    }
+                }
+                dir_path = "";
+            }
+        }
+
+        return result;
+    }
+
+    std::string getCommand() {
+        char ch;
+        bool firstTab = true;
+        std::string result;
+        std::vector<std::string> completions;
+
+        while (true) {
+            read(STDIN_FILENO, &ch, 1);
+
+            if (ch == '\n') {
+                // What if there is an open quote or other similar scenarios.
+                std::cout << std::endl;
+                break;
+            }
+            else if (ch == 127 || ch == '\b') {
+                if (!result.empty()) {
+                    result.pop_back();
+                    std::cout << "\b \b";
+                }
+            }
+            else if (ch == '\t') {
+                if (firstTab) {
+                    completions = autoComplete(result);
+                    if (completions.size() == 1) {
+                        std::cout << completions[0].substr(result.size()) << " ";
+                        result = completions[0] + " ";
+                    }
+                    else if (completions.size() > 1) {
+                        std::string prefix = longestCommonPrefix(completions);
+                        if (prefix.size() > 0)
+                            firstTab = false;
+
+                        std::cout << prefix.substr(result.size());
+                        result += prefix.substr(result.size());
+                        std::cout << "\a";
+                    }
+                    else if (completions.size() == 0) {
+                        std::cout << "\a";
+                    }
+                }
+                else {
+                    std::cout << std::endl;
+                    for (std::string &str: completions) {
+                        std::cout << str << " ";
+                    }
+                    std::cout << std::endl;
+                    std::cout << "$ " << result;
+                }
+            }
+            else if (isprint(ch)) {
+                result += ch;
+                std::cout << ch;
+            }
+
+            if (!firstTab && ch != '\t') {
+                firstTab = true;
+            }
+        }
+
+        return result;
+    }
+
 }
