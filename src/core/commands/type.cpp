@@ -3,7 +3,6 @@
 #include "../../utils/commandUtils.hpp"
 
 namespace cmds {
-
     void TypeCommand::execute() {
 
         for (const auto &arg: args) {

@@ -1,8 +1,8 @@
 #ifndef COMMAND_UTILS_HPP
 #define COMMAND_UTILS_HPP
 
-#include <string>
 #include <vector>
+#include <iostream>
 #include "types.hpp"
 
 namespace cmds {

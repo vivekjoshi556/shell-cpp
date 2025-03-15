@@ -1,6 +1,3 @@
-#include <iostream>
-
-#include "commandFactory.hpp"
 #include "commandRegistry.hpp"
 #include "../utils/commandUtils.hpp"
 

@@ -1,8 +1,5 @@
 #include "cd.hpp"
 #include <cstring>
-#include <cstdlib>
-#include <errno.h>
-#include <unistd.h>
 #include <iostream>
 
 namespace cmds {

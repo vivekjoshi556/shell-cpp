@@ -1,4 +1,3 @@
-#include <iostream>
 #include <fcntl.h>
 #include "command.hpp"
 #include <unordered_set>
