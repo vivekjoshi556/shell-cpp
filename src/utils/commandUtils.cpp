@@ -3,6 +3,7 @@
 #include <iostream>
 #include <algorithm>
 #include <filesystem>
+#include <unordered_set>
 #include "commandUtils.hpp"
 #include "../core/commandRegistry.hpp"
 
@@ -136,11 +137,14 @@ namespace cmds {
 
     std::vector<std::string> autoComplete(const std::string &partial) {
         std::vector<std::string> result;
+
+        std::unordered_set<std::string> names_found;
         
         // Look into built-in commands
         for(auto it: command_registry) {
             if(it.first.find(partial) == 0) {
                 result.push_back(it.first);
+                names_found.insert(it.first);
             }
         }
 
@@ -148,7 +152,8 @@ namespace cmds {
         std::string env = getenv("PATH");
         int start = 0, end = 0;
         std::string dir_path = "";
-        
+        std::unordered_set<std::string> processed_paths;
+
         while (start < env.size()) {
             end = env.find(':', start);
             if(end != std::string::npos) {
@@ -162,7 +167,9 @@ namespace cmds {
                 start = env.size();
             }
 
-            if (dir_path != "") {
+            if (dir_path != "" && processed_paths.find(dir_path) == processed_paths.end()) {
+                processed_paths.insert(dir_path);
+
                 for (auto const &dir_entry: fs::directory_iterator(dir_path)) {
                     std::string p = dir_entry.path().string();
 
@@ -171,7 +178,8 @@ namespace cmds {
                         p = p.substr(last_idx + 1);
                         
                         if(p.find(partial) == 0) {
-                            result.push_back(p);
+                            if (names_found.find(p) == names_found.end())
+                                result.push_back(p);
                         }
                     }
                 }
@@ -225,7 +233,7 @@ namespace cmds {
                 else {
                     std::cout << std::endl;
                     for (std::string &str: completions) {
-                        std::cout << str << " ";
+                        std::cout << str << "  ";
                     }
                     std::cout << std::endl;
                     std::cout << "$ " << result;
