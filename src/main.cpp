@@ -24,6 +24,7 @@ int main() {
         if (input.empty())
             continue;
 
+        history.push_back(input);
         auto command = cmds::createCommand(input);
         if (command) {
             command->execute();

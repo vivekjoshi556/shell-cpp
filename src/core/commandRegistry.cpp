@@ -5,6 +5,7 @@
 #include "./commands/exit.hpp"
 #include "./commands/type.hpp"
 #include "./commands/echo.hpp"
+#include "./commands/history.hpp"
 #include "./commands/cmdexec.hpp"
 
 namespace cmds {
@@ -12,6 +13,7 @@ namespace cmds {
         {"cd", makeCommand<CdCommand>},
         {"pwd", makeCommand<PwdCommand>},
         {"echo", makeCommand<EchoCommand>},
+        {"history", makeCommand<HistoryCommand>},
         {"type", makeCommand<TypeCommand>},
         {"exit", makeCommand<ExitCommand>},
         {"cmdexec", makeCommand<Cmdexec>}

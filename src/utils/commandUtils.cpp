@@ -2,6 +2,7 @@
 #include <filesystem>
 #include <unordered_set>
 #include "commandUtils.hpp"
+#include "../core/terminalSettings.hpp"
 #include "../core/commandRegistry.hpp"
 
 namespace fs = std::filesystem;
@@ -167,16 +168,20 @@ namespace cmds {
             if (dir_path != "" && processed_paths.find(dir_path) == processed_paths.end()) {
                 processed_paths.insert(dir_path);
 
-                for (auto const &dir_entry: fs::directory_iterator(dir_path)) {
-                    std::string p = dir_entry.path().string();
+                if (fs::exists(dir_path)) {
+                    for (auto const &dir_entry : fs::directory_iterator(dir_path)) {
+                        std::string p = dir_entry.path().string();
 
-                    int last_idx = p.find_last_of(fs::path::preferred_separator);
-                    if (last_idx != std::string::npos) {
-                        p = p.substr(last_idx + 1);
-                        
-                        if(p.find(partial) == 0) {
-                            if (names_found.find(p) == names_found.end())
-                                result.push_back(p);
+                        int last_idx = p.find_last_of(fs::path::preferred_separator);
+                        if (last_idx != std::string::npos)
+                        {
+                            p = p.substr(last_idx + 1);
+
+                            if (p.find(partial) == 0)
+                            {
+                                if (names_found.find(p) == names_found.end())
+                                    result.push_back(p);
+                            }
                         }
                     }
                 }
@@ -190,11 +195,51 @@ namespace cmds {
     std::string getCommand() {
         char ch;
         bool firstTab = true;
+        int historyIdx = history.size();
         std::string result;
+        std::string curr = "";
         std::vector<std::string> completions;
 
         while (true) {
             read(STDIN_FILENO, &ch, 1);
+
+            if (ch == '\x1b') {
+                std::string seq(2, '\0'); ;
+                read(STDIN_FILENO, &seq[0], 2);
+
+                if (seq == "[A") {
+                    if (historyIdx == 0) 
+                        continue;
+
+                    if(historyIdx == history.size())
+                        curr = result;
+                    
+                    std::cout << "\33[2K\r" << std::flush;
+                    result = history[historyIdx - 1];
+                    std::cout << "$ " << result;
+                    historyIdx--;
+                }
+                else if (seq == "[B") {
+                    if (historyIdx == history.size())
+                    continue;
+                    
+                    std::cout << "\33[2K\r" << std::flush;
+                    historyIdx++;
+                    if (historyIdx == history.size()) {
+                        result = curr;
+                        std::cout << "$ " << result;
+                        continue;
+                    }
+
+                    result = history[historyIdx];
+                    std::cout << "$ " << result;
+                }
+                
+                continue;
+            }
+            else {
+                historyIdx = history.size();
+            }
 
             if (ch == '\n') {
                 // What if there is an open quote or other similar scenarios.

@@ -1,6 +1,8 @@
 #include <unistd.h>
 #include "terminalSettings.hpp"
 
+std::vector<std::string> history;
+
 TerminalSettings& TerminalSettings::getInstance() {
     static TerminalSettings instance;
     return instance;
