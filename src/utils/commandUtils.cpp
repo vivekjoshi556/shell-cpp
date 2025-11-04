@@ -2,7 +2,6 @@
 #include <filesystem>
 #include <unordered_set>
 #include "commandUtils.hpp"
-#include "../core/terminalSettings.hpp"
 #include "../core/commandRegistry.hpp"
 
 namespace fs = std::filesystem;
@@ -55,7 +54,7 @@ namespace cmds {
             end = s.find(del, start);
             std::string path_url = s.substr(start, end - start) + "/" + name;
 
-            if (access(path_url.c_str(), F_OK) == 0) {
+            if (access(path_url.c_str(), F_OK | X_OK) == 0) {
                 return std::make_pair(CommandType::PATH, path_url);
             }
         } while (end != -1);
@@ -136,6 +135,9 @@ namespace cmds {
     std::vector<std::string> autoComplete(const std::string &partial) {
         std::vector<std::string> result;
 
+        if (partial == "") 
+            return result;
+
         std::unordered_set<std::string> names_found;
         
         // Look into built-in commands
@@ -168,20 +170,25 @@ namespace cmds {
             if (dir_path != "" && processed_paths.find(dir_path) == processed_paths.end()) {
                 processed_paths.insert(dir_path);
 
-                if (fs::exists(dir_path)) {
-                    for (auto const &dir_entry : fs::directory_iterator(dir_path)) {
-                        std::string p = dir_entry.path().string();
+                // Resolve HOME
+                if (dir_path[0] == '~') {
+                    dir_path = getenv("HOME") + dir_path.substr(1);
+                }
 
-                        int last_idx = p.find_last_of(fs::path::preferred_separator);
-                        if (last_idx != std::string::npos)
-                        {
-                            p = p.substr(last_idx + 1);
+                if (!fs::exists(dir_path) || !fs::is_directory(dir_path)) {
+                    continue;
+                }
 
-                            if (p.find(partial) == 0)
-                            {
-                                if (names_found.find(p) == names_found.end())
-                                    result.push_back(p);
-                            }
+                for (auto const &dir_entry: fs::directory_iterator(dir_path)) {
+                    std::string p = dir_entry.path().string();
+
+                    int last_idx = p.find_last_of(fs::path::preferred_separator);
+                    if (last_idx != std::string::npos) {
+                        p = p.substr(last_idx + 1);
+                        
+                        if(p.find(partial) == 0) {
+                            if (names_found.find(p) == names_found.end())
+                                result.push_back(p);
                         }
                     }
                 }
@@ -195,51 +202,11 @@ namespace cmds {
     std::string getCommand() {
         char ch;
         bool firstTab = true;
-        int historyIdx = history.size();
         std::string result;
-        std::string curr = "";
         std::vector<std::string> completions;
 
         while (true) {
             read(STDIN_FILENO, &ch, 1);
-
-            if (ch == '\x1b') {
-                std::string seq(2, '\0'); ;
-                read(STDIN_FILENO, &seq[0], 2);
-
-                if (seq == "[A") {
-                    if (historyIdx == 0) 
-                        continue;
-
-                    if(historyIdx == history.size())
-                        curr = result;
-                    
-                    std::cout << "\33[2K\r" << std::flush;
-                    result = history[historyIdx - 1];
-                    std::cout << "$ " << result;
-                    historyIdx--;
-                }
-                else if (seq == "[B") {
-                    if (historyIdx == history.size())
-                    continue;
-                    
-                    std::cout << "\33[2K\r" << std::flush;
-                    historyIdx++;
-                    if (historyIdx == history.size()) {
-                        result = curr;
-                        std::cout << "$ " << result;
-                        continue;
-                    }
-
-                    result = history[historyIdx];
-                    std::cout << "$ " << result;
-                }
-                
-                continue;
-            }
-            else {
-                historyIdx = history.size();
-            }
 
             if (ch == '\n') {
                 // What if there is an open quote or other similar scenarios.
@@ -277,8 +244,7 @@ namespace cmds {
                     for (std::string &str: completions) {
                         std::cout << str << "  ";
                     }
-                    std::cout << std::endl;
-                    std::cout << "$ " << result;
+                    std::cout << std::endl << "$ " << result;
                 }
             }
             else if (isprint(ch)) {
