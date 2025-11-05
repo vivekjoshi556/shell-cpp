@@ -3,6 +3,7 @@
 #include <unordered_set>
 #include "commandUtils.hpp"
 #include "../core/commandRegistry.hpp"
+#include "../core/terminalSettings.hpp"
 
 namespace fs = std::filesystem;
 
@@ -204,6 +205,8 @@ namespace cmds {
         bool firstTab = true;
         std::string result;
         std::vector<std::string> completions;
+        std::string currCommand = "";
+        int historyIdx = history.size();
 
         while (true) {
             read(STDIN_FILENO, &ch, 1);
@@ -212,6 +215,31 @@ namespace cmds {
                 // What if there is an open quote or other similar scenarios.
                 std::cout << std::endl;
                 break;
+            }
+            else if (ch == 27) {
+                read(STDIN_FILENO, &ch, 1);
+                if (ch == '[') {
+                    read(STDIN_FILENO, &ch, 1);
+                    if (ch == 'A') { // up arrow key
+                        if (historyIdx == history.size()) {
+                            currCommand = result;
+                        }
+                        if (historyIdx == 0)
+                            continue;
+                        historyIdx -= 1;
+                    
+                        result = history[historyIdx];
+                    }
+                    else if (ch == 'B') { // down arrow key
+                        if (historyIdx == history.size()) {
+                            continue;
+                        }
+                        historyIdx += 1;
+
+                        result = (historyIdx == history.size()) ? currCommand : history[historyIdx];
+                    }
+                    std::cout<< "\33[2K\r" << "$ " << result;
+                }
             }
             else if (ch == 127 || ch == '\b') {
                 if (!result.empty()) {
