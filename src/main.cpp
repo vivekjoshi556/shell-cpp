@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <iostream>
 #include "core/command.hpp"
+#include "core/exitException.hpp"
 #include "utils/commandUtils.hpp"
 #include "core/commandFactory.hpp"
 #include "core/commandRegistry.hpp"
@@ -27,7 +28,13 @@ int main() {
         history.push_back(input);
         auto command = cmds::createCommand(input);
         if (command) {
-            command->execute();
+            try {
+                command->execute();
+            } catch (const ExitException& e) {
+                // Exit Exception to exit program and let the call stack unroll.
+                break;
+            }
+
         }
     }
 

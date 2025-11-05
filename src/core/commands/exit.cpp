@@ -1,8 +1,9 @@
 #include <cstdlib>
+#include "../exitException.hpp"
 #include "exit.hpp"
 
 namespace cmds {
     void ExitCommand::execute() {
-        std::exit(0);
+        throw ExitException();
     }
 }
