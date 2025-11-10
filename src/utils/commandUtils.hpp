@@ -10,7 +10,7 @@ namespace cmds {
     extern int std_err;
 
     std::pair<CommandType, std::string> findCommandType(const std::string&);
-    std::vector<std::string> parseCommands(const std::string&);
+    std::pair<std::vector<std::string>, int> parseCommands(const std::string&, int);
 
     std::vector<std::string> autoComplete(const std::string &);
     std::string getCommand();

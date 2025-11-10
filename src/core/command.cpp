@@ -1,4 +1,5 @@
 #include <fcntl.h>
+#include <csignal>
 #include "command.hpp"
 #include <unordered_set>
 #include "../utils/commandUtils.hpp"
@@ -42,6 +43,36 @@ namespace cmds {
 
     std::string Command::getName() { 
         return this->name;
+    }
+
+    cmds::CommandType Command::getType() { 
+        return this->type;
+    }
+
+    void Command::addArg(std::string arg) {
+        this->args.push_back(arg);
+    }
+
+    pid_t Command::piped_execute(int input_fd, int output_fd, pid_t pgid) {
+        pid_t pid = fork();
+        if (pid == 0) {
+            if (input_fd != STDIN_FILENO) {
+                dup2(input_fd, STDIN_FILENO);
+                close(input_fd);
+            }
+            if (output_fd != STDOUT_FILENO) {
+                dup2(output_fd, STDOUT_FILENO);
+                close(output_fd);
+            }
+            
+            setpgid(pid, pgid);
+            signal(SIGINT, SIG_DFL);
+            
+            this->execute();
+            exit(0);
+        }
+
+        return pid;
     }
 
     Command::~Command() {

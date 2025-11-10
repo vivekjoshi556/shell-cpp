@@ -63,17 +63,18 @@ namespace cmds {
         return std::make_pair(CommandType::UNKNOWN, "");
     }
 
-    std::vector<std::string> parseCommands(const std::string &str) {
+    std::pair<std::vector<std::string>, int> parseCommands(const std::string &str, int at = 0) {
         std::vector<std::string> result;
         
-        if (str.empty()) return result;
+        if (str.empty()) return make_pair(result, 0);
 
         std::string token;
         bool activeSingleQuote = false;
         bool activeDoubleQuote = false;
         bool escape = false;
     
-        for (char ch : str) {
+        for (; at < str.size(); at++) {
+            char ch = str[at];
             if (activeSingleQuote || activeDoubleQuote) {
                 if (activeSingleQuote && ch != '\'') {
                     token.push_back(ch);
@@ -121,6 +122,9 @@ namespace cmds {
                     token.clear();
                 }
             }
+            else if (ch == '|') {
+                break;
+            }
             else {
                 token.push_back(ch);
             }
@@ -130,7 +134,7 @@ namespace cmds {
             result.push_back(token);
         }
     
-        return result;
+        return make_pair(result, at);
     }
 
     std::vector<std::string> autoComplete(const std::string &partial) {
@@ -210,6 +214,11 @@ namespace cmds {
 
         while (true) {
             read(STDIN_FILENO, &ch, 1);
+            if (interrupted) {
+                currCommand = "";
+                result = "";
+                interrupted = false;
+            }
 
             if (ch == '\n') {
                 // What if there is an open quote or other similar scenarios.

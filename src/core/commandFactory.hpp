@@ -4,7 +4,7 @@
 #include "command.hpp"
 
 namespace cmds {
-    CommandPtr createCommand(const std::string&);
+    std::vector<CommandPtr> createCommand(const std::string&);
 }
 
 #endif

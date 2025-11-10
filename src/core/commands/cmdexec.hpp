@@ -8,6 +8,7 @@ namespace cmds {
     public:
         using Command::Command;
         void execute() override;
+        pid_t piped_execute(int input_fd = STDIN_FILENO, int output_fd = STDOUT_FILENO, int pgid = 0);
     };
 }
 
