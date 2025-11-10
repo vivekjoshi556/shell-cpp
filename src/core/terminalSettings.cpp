@@ -26,7 +26,6 @@ void sigint_handler(int signo) {
 
 void TerminalSettings::applyRawMode() {
     struct termios raw = original;
-    
     // disable canonical mode & echo so input gets processed 1 char at a time.
     raw.c_lflag &= ~(ECHO | ICANON);
     raw.c_cc[VMIN] = 1;
@@ -34,6 +33,9 @@ void TerminalSettings::applyRawMode() {
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
     
     signal(SIGINT, sigint_handler);
+    // We have to ignore these signals so we can reclaim the control before it gets stopped.
+    signal(SIGTTOU, SIG_IGN);
+    signal(SIGTTIN, SIG_IGN);
 }
 
 TerminalSettings::TerminalSettings() {

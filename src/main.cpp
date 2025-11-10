@@ -86,6 +86,8 @@ int main() {
         for (pid_t pid: pids) {
             waitpid(pid, nullptr, 0);
         }
+        
+        tcsetpgrp(STDIN_FILENO, getpgrp());
         instance.applyRawMode();
     }
 
