@@ -3,8 +3,11 @@
 
 namespace cmds {
     void EchoCommand::execute() {
-        for (const std::string &str: args)
-            std::cout << str << " ";
+        for (int i = 0; i < args.size(); i++) {
+            std::cout << args[i];
+            if (i < args.size() - 1)
+                std::cout << " ";
+        }
         std::cout << std::endl;
     }
 }
