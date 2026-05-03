@@ -1,3 +1,5 @@
+#include <string>
+#include <sstream>
 #include <algorithm>
 #include <filesystem>
 #include <unordered_set>
@@ -21,6 +23,32 @@ namespace cmds {
         atexit(cleanup);
         return true;
     }();
+
+    std::vector<std::string> split(std::string &str, char del=' ') {
+        std::vector<std::string> result;
+
+        std::string temp;
+        std::stringstream ss(str);
+        
+        while (getline(ss, temp, del))
+            result.push_back(temp);
+        
+        if (str[str.size() - 1] == del) {
+            result.push_back("");
+        }
+
+        return result;
+    }
+
+    std::string join(std::vector<std::string> &parts, char del=' ') {
+        std::string result;
+
+        for (std::string &part: parts) {
+            result += part;
+        }
+
+        return result;
+    }
 
     std::string longestCommonPrefix(std::vector<std::string>& strs) {
         if (strs.empty()) return "";
@@ -137,7 +165,7 @@ namespace cmds {
         return make_pair(result, at);
     }
 
-    std::vector<std::string> autoComplete(const std::string &partial) {
+    std::vector<std::string> autoCompleteCmd(const std::string &partial) {
         std::vector<std::string> result;
 
         if (partial == "") 
@@ -204,10 +232,53 @@ namespace cmds {
         return result;
     }
 
+    std::vector<std::string> autoCompletePath(std::string ipPath) {
+        std::vector<std::string> result;
+        // std::cout << " Looking for: " << ipPath << std::endl;
+
+        std::unordered_set<std::string> names_found;
+
+        int pathSepIdx = ipPath.rfind(fs::path::preferred_separator);
+        std::string prefixPath = std::string(".") + fs::path::preferred_separator;
+        std::string completionPrefix = ipPath.substr(pathSepIdx + 1);
+
+        if (pathSepIdx != std::string::npos) {
+            prefixPath = ipPath.substr(0, pathSepIdx + 1);
+        }
+
+        // std::cout << " | " << prefixPath << " | " << std::endl;
+
+        if (!fs::exists(prefixPath) || !fs::is_directory(prefixPath)) {
+            // std::cout << " [Invalid Dir] ";
+            return result;
+        }
+
+        for (auto const &dir_entry: fs::directory_iterator(prefixPath)) {
+            std::string p = dir_entry.path().string();
+
+            int last_idx = p.find_last_of(fs::path::preferred_separator);
+            if (last_idx != std::string::npos) {
+                // std::cout << p << " => ";
+                p = p.substr(last_idx + 1);
+
+                // std::cout << p << " " << ipPath << " " << completionPrefix << " " << p.find(ipPath) << " ";
+                if(p.find(completionPrefix) == 0) {
+                    if (completionPrefix.size() == 0 || names_found.find(p) == names_found.end())
+                        result.push_back(
+                            (pathSepIdx != std::string::npos ? prefixPath : "") + p + (dir_entry.is_directory() ? "/" : "")
+                        );
+                }
+            }
+        }
+
+        // std::cout << " Found: " << result.size() << std::endl;
+        return result;
+    }
+
     std::string getCommand() {
         char ch;
         bool firstTab = true;
-        std::string result;
+        std::string ip;
         std::vector<std::string> completions;
         std::string currCommand = "";
         int historyIdx = history.size();
@@ -216,7 +287,7 @@ namespace cmds {
             read(STDIN_FILENO, &ch, 1);
             if (interrupted) {
                 currCommand = "";
-                result = "";
+                ip = "";
                 interrupted = false;
             }
 
@@ -231,13 +302,13 @@ namespace cmds {
                     read(STDIN_FILENO, &ch, 1);
                     if (ch == 'A') { // up arrow key
                         if (historyIdx == history.size()) {
-                            currCommand = result;
+                            currCommand = ip;
                         }
                         if (historyIdx == 0)
                             continue;
                         historyIdx -= 1;
                     
-                        result = history[historyIdx];
+                        ip = history[historyIdx];
                     }
                     else if (ch == 'B') { // down arrow key
                         if (historyIdx == history.size()) {
@@ -245,32 +316,40 @@ namespace cmds {
                         }
                         historyIdx += 1;
 
-                        result = (historyIdx == history.size()) ? currCommand : history[historyIdx];
+                        ip = (historyIdx == history.size()) ? currCommand : history[historyIdx];
                     }
-                    std::cout<< "\33[2K\r" << "$ " << result;
+                    std::cout<< "\33[2K\r" << "$ " << ip;
                 }
             }
             else if (ch == 127 || ch == '\b') {
-                if (!result.empty()) {
-                    result.pop_back();
+                if (!ip.empty()) {
+                    ip.pop_back();
                     std::cout << "\b \b";
                 }
             }
             else if (ch == '\t') {
+                std::vector<std::string> parts = split(ip);
                 if (firstTab) {
-                    completions = autoComplete(result);
+                    std::string completionIp = (parts.size() == 1) ? ip : parts[parts.size() - 1];
+
+                    completions = (parts.size() == 1) ? autoCompleteCmd(completionIp) : autoCompletePath(completionIp);
                     if (completions.size() == 1) {
-                        std::cout << completions[0].substr(result.size()) << " ";
-                        result = completions[0] + " ";
+                        std::string ans = completions[0];
+                        std::string spacing = (ans[ans.size() - 1] == fs::path::preferred_separator ? "" : " ");
+                        std::cout << ans.substr(completionIp.size()) + spacing;
+                        // If it's a directory match skip ' '.
+                        ip += ans.substr(completionIp.size()) + spacing;
                     }
                     else if (completions.size() > 1) {
                         std::string prefix = longestCommonPrefix(completions);
-                        if (prefix.size() > 0)
-                            firstTab = false;
+                        // std::cout << "| Prefix: " << prefix << prefix.size()  << completionIp << " |" << std::endl;
 
-                        std::cout << prefix.substr(result.size());
-                        result += prefix.substr(result.size());
-                        std::cout << "\a";
+                        firstTab = false;
+                        if (prefix.size() > 0) {
+                            std::cout << prefix.substr(completionIp.size());
+                            ip += prefix.substr(completionIp.size());
+                            std::cout << "\a";
+                        }
                     }
                     else if (completions.size() == 0) {
                         std::cout << "\a";
@@ -281,11 +360,11 @@ namespace cmds {
                     for (std::string &str: completions) {
                         std::cout << str << "  ";
                     }
-                    std::cout << std::endl << "$ " << result;
+                    std::cout << std::endl << "$ " << ip;
                 }
             }
             else if (isprint(ch)) {
-                result += ch;
+                ip += ch;
                 std::cout << ch;
             }
 
@@ -294,7 +373,7 @@ namespace cmds {
             }
         }
 
-        return result;
+        return ip;
     }
 
 }
